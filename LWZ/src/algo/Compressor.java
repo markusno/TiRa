@@ -4,6 +4,9 @@
  */
 package algo;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -26,12 +29,12 @@ public class Compressor {
         }
     }
     
-    public ArrayList<Integer> compres(String text){
+    public ArrayList<Integer> compres(FileInputStream input) throws IOException{
         ArrayList<Integer> compressed = new ArrayList<>();
         String currentString = "";
         char currentChar;
-        for (int i = 0; i < text.length(); i++){
-            currentChar = text.charAt(i);
+        while (input.available() > 0){
+            currentChar = (char)input.read();
             if (!codeDictionary.containsKey(currentString+currentChar)){
                 Integer currentCode = codeDictionary.get(currentString);
                 codeDictionary.put
