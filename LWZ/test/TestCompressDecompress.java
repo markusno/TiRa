@@ -41,7 +41,7 @@ public class TestCompressDecompress {
     private void initOriginal() throws FileNotFoundException, IOException{
         FileOutputStream out = new FileOutputStream(original);
         Random r = new Random();
-        for (int i = 0; i < 10000; i++){
+        for (int i = 0; i < 2000; i++){
             out.write(r.nextInt(256));
         }
         out.close();
@@ -56,7 +56,7 @@ public class TestCompressDecompress {
             char o = (char)org.read();
             char d = (char)decomp.read();
             if (o != d){
-                message = i +". tavu väärin pitäisi olla: [" + o + "] on: [" + d + "]";
+                message += i +". tavu väärin pitäisi olla: [" + o + "] on: [" + d + "]";
                 org.close();
                 decomp.close();
                 return false;
@@ -64,7 +64,7 @@ public class TestCompressDecompress {
             i++;
         }
         if (org.available() != decomp.available()){
-            message = "eri koko";
+            message += "eri koko";
             return false;
         }
         return true;
@@ -74,9 +74,11 @@ public class TestCompressDecompress {
     public void testCompressDecompress()throws IOException{
         initOriginal();
         FileInputStream in = new FileInputStream(original);
-        ArrayList<Integer> comp = compressor.compres(in);
-        FileOutputStream out = new FileOutputStream(decompressed);
-        decompressor.deCompres(comp, out);
+        FileOutputStream out = new FileOutputStream(compressed);
+        compressor.compres(in, out);
+        in = new FileInputStream(compressed);
+        out = new FileOutputStream(decompressed);
+        decompressor.deCompres(in, out);
         boolean match = comparison();
         assertEquals(message, true, match);
     }

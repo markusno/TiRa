@@ -4,6 +4,7 @@
  */
 package algo;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,38 +15,64 @@ import java.util.HashMap;
  * @author markus
  */
 public class DeCompressor {
-    
+
     private HashMap<Integer, String> stringDictionary;
-    
-    public DeCompressor(){
+
+    public DeCompressor() {
         stringDictionary = new HashMap<>();
         initDictionary();
     }
-    
-    private void initDictionary(){
-        for (int i = 0; i < 256; i++){
-            stringDictionary.put(i, Character.toString((char)(i)));
+
+    private void initDictionary() {
+        for (int i = 0; i < 256; i++) {
+            stringDictionary.put(i, Character.toString((char) (i)));
         }
     }
-    
-    public String deCompres (ArrayList<Integer> codes, FileOutputStream output) throws IOException{
+
+    public String deCompres(FileInputStream input, FileOutputStream output) throws IOException {
         String deCompressed = "";
         String previous = "";
-        for (Integer code : codes){
-            if (!stringDictionary.containsKey(code)){
+        ArrayList<Integer> codes = codesFromFile(input);
+        for (Integer code : codes) {
+            if (!stringDictionary.containsKey(code)) {
                 stringDictionary.put(code, previous + previous.charAt(0));
             }
-            deCompressed += stringDictionary.get(code);            
+            deCompressed += stringDictionary.get(code);
             if (previous.length() > 0) {
-                stringDictionary.put(stringDictionary.size(), 
+                stringDictionary.put(stringDictionary.size(),
                         previous + stringDictionary.get(code).charAt(0));
             }
             previous = stringDictionary.get(code);
         }
-        for (int i = 0; i < deCompressed.length(); i++){
-            output.write((int)deCompressed.charAt(i));
+        for (int i = 0; i < deCompressed.length(); i++) {
+            output.write((int) deCompressed.charAt(i));
         }
         output.close();
         return deCompressed;
+    }
+
+    ArrayList<Integer> codesFromFile(FileInputStream input) throws IOException {
+        ArrayList<Integer> codes = new ArrayList<>();
+        boolean[] bits = new boolean[24];
+        while (input.available() > 0) {
+            for (int i = 0; i < 3; i++) {
+                int bYte = input.read();
+                for (int j = 0; j < 8; j++) {
+                    bits[j + 8 * i] = (bYte & (1 << (7 - j))) != 0;
+                }
+            }
+            for (int i = 0; i < 2; i++) {
+                int code = 0;
+                for (int j = 0; j < 12; j++) {
+                    if (bits[j + 12 * i]) {
+                        code += (1 << (11 - j));
+                    }
+                }
+                if (input.available() > 3 || code != 0) {
+                    codes.add(code);
+                }
+            }
+        }
+        return codes;
     }
 }
