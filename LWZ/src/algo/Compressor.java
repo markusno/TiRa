@@ -20,7 +20,7 @@ public class Compressor {
     private HashMap<String, Integer> codeDictionary;
 
     public Compressor() {
-        codeDictionary = new HashMap<>();
+        codeDictionary = new HashMap<String, Integer>();
         initDictionary();
     }
 
@@ -31,7 +31,7 @@ public class Compressor {
     }
 
     public ArrayList<Integer> compres(FileInputStream input, FileOutputStream output) throws IOException {
-        ArrayList<Integer> compressed = new ArrayList<>();
+        ArrayList<Integer> compressed = new ArrayList<Integer>();
         String currentString = "";
         char currentChar;
         while (input.available() > 0) {
@@ -60,7 +60,7 @@ public class Compressor {
                 } else {
                     code = 0;
                 }
-                //System.out.println(code);
+                System.out.println(code);
                 for (int j = 0; j < 12; j++) {
                     bits[j + 12*i] = (code & (1 << (11 - j))) != 0;
 

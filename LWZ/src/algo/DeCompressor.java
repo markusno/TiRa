@@ -19,7 +19,7 @@ public class DeCompressor {
     private HashMap<Integer, String> stringDictionary;
 
     public DeCompressor() {
-        stringDictionary = new HashMap<>();
+        stringDictionary = new HashMap<Integer, String>();
         initDictionary();
     }
 
@@ -36,12 +36,15 @@ public class DeCompressor {
         for (Integer code : codes) {
             if (!stringDictionary.containsKey(code)) {
                 stringDictionary.put(code, previous + previous.charAt(0));
+                System.out.println(previous + previous.charAt(0));
             }
-            deCompressed += stringDictionary.get(code);
-            if (previous.length() > 0) {
+            
+            else if (previous.length() > 0 ) {
                 stringDictionary.put(stringDictionary.size(),
                         previous + stringDictionary.get(code).charAt(0));
+                System.out.println(previous + stringDictionary.get(code).charAt(0));
             }
+            deCompressed += stringDictionary.get(code);
             previous = stringDictionary.get(code);
         }
         for (int i = 0; i < deCompressed.length(); i++) {
@@ -52,7 +55,7 @@ public class DeCompressor {
     }
 
     ArrayList<Integer> codesFromFile(FileInputStream input) throws IOException {
-        ArrayList<Integer> codes = new ArrayList<>();
+        ArrayList<Integer> codes = new ArrayList<Integer>();
         boolean[] bits = new boolean[24];
         while (input.available() > 0) {
             for (int i = 0; i < 3; i++) {
@@ -68,6 +71,7 @@ public class DeCompressor {
                         code += (1 << (11 - j));
                     }
                 }
+                System.out.println(code);
                 if (input.available() > 3 || code != 0) {
                     codes.add(code);
                 }

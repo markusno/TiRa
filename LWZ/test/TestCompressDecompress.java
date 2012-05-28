@@ -72,7 +72,7 @@ public class TestCompressDecompress {
     
     @Test
     public void testCompressDecompress()throws IOException{
-        initOriginal();
+        //initOriginal();
         FileInputStream in = new FileInputStream(original);
         FileOutputStream out = new FileOutputStream(compressed);
         compressor.compres(in, out);

@@ -31,11 +31,12 @@ public class TestMain {
             a = new FileInputStream(fIn);
             b = new FileOutputStream(fComp);
             c.compres(a, b);
+            System.out.println("Decomp");
             a = new FileInputStream(fComp);
             b = new FileOutputStream(fOut);
             String p = d.deCompres(a, b);
             //System.out.println(a);
-            System.out.println(p);
+            //System.out.println(p);
             
         } catch (Exception ex) {
             Logger.getLogger(TestMain.class.getName()).log(Level.SEVERE, null, ex);
