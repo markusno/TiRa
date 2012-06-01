@@ -1,0 +1,340 @@
+----------------------------
+- OHJE BITTIEN KÄSITTELYYN -
+----------------------------
+
+JOHDANTO
+--------
+Yksi tavu sisältää normaaleissa tietokoneissa aina 8 bittiä, joista
+jokaisella on binäärinen arvo 0 tai 1. Tietokone osaa käsitellä
+asioita vain tavu kerrallaan, joten bitit täytyy lukea ja kirjoittaa
+välivaiheen avulla.
+
+Tekstin aiheena on bittien käsitteleminen. Ensin
+käydään läpi lukujen binääriesitys ja tavallisimmat
+bittioperaatiot. Lisäksi annetaan metodit muunnoksiin
+tavujen ja bittitaulukoiden välillä Java-kielellä. Lopuksi
+annetaan yleiset suuntaviivat binääristen tiedostojen
+lukemiseen ja kirjoittamiseen.
+
+
+
+LUKUJEN BINÄÄRIESITYS
+---------------------
+Jokaista 10-järjestelmän lukua vastaa jokin binäärijärjestelmän
+(2-järjestelmän) luku ja toisin päin.
+
+Luvut voidaan ilmaista kantalukujen potenssien avulla:
+10-järjestelmässä 1204 = 1*10^3 + 2*10^2 + 0*10^1 + 4*10^0
+
+10-järjestelmä --> 2-järjestelmä:
+1204 = 1024 + 128 + 32 + 16 + 4
+     = 1024   + 0     + 0     + 128   + 0     + 32    + 16    + 0     + 4     + 0     + 0
+     = 1*2^10 + 0*2^9 + 0*2^8 + 1*2^7 + 0*2^6 + 1*2^5 + 1*2^4 + 0*2^3 + 1*2^2 + 0*2^1 + 0*2^0
+     = 1        0       0       1       0       1       1       0       1       0       0 (bin)
+     = 10010110100 (bin)
+
+2-järjestelmä --> 10-järjestelmä:
+1001011 (bin) = 1*2^6 + 0*2^5 + 0*2^4 + 1*2^3 + 0*2^2 + 1*2^1 + 1*2^0
+              = 1*64  + 0*32  + 0*16  + 1*8   + 0*4   + 1*2   + 1*1
+              = 64    + 0     + 0     + 8     + 0     + 2     + 1
+              = 75
+
+Tietokoneissa luvun ensimmäinen bitti on varattu etumerkiksi.
+Arvo 0 tarkoittaa positiivista ja arvo 1 negatiivista lukua.
+
+Javassa kokonaislukutyyppi byte ja C-kielessä char vievät tilaa
+yhden tavun eli 8 bittiä. 8 bitillä voi ilmaista 2^8 = 256 erilaista
+lukua.
+
+Javan byte-tyypin arvoalue on [-128, +127]:
+01111111 = + 127
+...
+00011011 = + 27
+...
+00000001 = + 1
+00000000 = + 0
+11111111 = - 1
+...
+10000010 = - 126
+...
+10000000 = - 128
+
+C-kielen signed char -tyyppin arvoalueeksi on määritelty ainakin
+[-127, +127]. Tarkat arvot riippuvat käytössä olevasta laitteistosta.
+Yleensä arvoalue on [-128, +127], mutta standardi ei takaa tätä.
+
+Lukujen ylivuodot ovat mahdollisia. Kun 8-bittisen muuttujan
+arvoon +127 lisätään ykkönen, saadaan luku -128. Tämä voi
+vaihdella riippuen laitteistosta. 
+  127    +    1    =   -128
+01111111 + 0000001 = 10000000
+
+Huomaa, että Javan tyyppi char vie 2 tavua ja sen arvoalue
+on [0, 65535]. Paras tapa lukea puhtaita tavuja esim. tiedostosta
+on käyttää FileInputStream-luokkaa, koska silloin
+luettavat merkit ovat aina int-tyyppisiä (luvut [0, 255]).
+Jonkin muun luokan käyttäminen (esim. FileReader) saataa johtaa
+Unicode-merkkien lukemiseen (arvot [256, 65535]), mikä ei ole
+aina toivottavaa. Muista käyttää myös BufferedInputStream-luokkaa.
+Kirjoittamiseen voi käyttää vastaavia Output-luokkia.
+
+C-kielessä on suositeltavaa käyttää tyyppiä unsigned char,
+jonka arvoalue on ainakin [0, 255]:
+
+Useimmissa laitteistoissa:
+
+char    unsigned char
+---------------------
+   0  |-->     0
+  +1  |-->    +1
+ ...        ...
++127  |-->  +127
+-128  |-->  +128
+-127  |-->  +129
+-126  |-->  +130
+ ...        ...
+  -2  |-->  +254
+  -1  |-->  +255
+
+
+Pilkunviilausta, jos kiinnostaa tietää:
+Joissakin harvinaisissa tapauksissa bittien määrä ei ole 8.
+Bittien lukumäärä tavussa on määritelty C-kielessä makrolla
+"CHAR_BIT" otsikkotiedostossa <limits.h>. Samaten Javassa on
+määritelty vakio "Byte.SIZE".
+
+
+
+
+BITTISIIRROT
+------------
+Bittisiirrot ovat operaatioita, joilla luvun bittejä voi
+siirtää vasemmalle tai oikealle.
+
+Esimerkkejä:
+
+Luvun 6 binääriesitys 8 bitillä (tavu) on 00000110 (2^2 + 2^1 = 6).
+Luvun 5 binääriesitys 8 bitillä (tavu) on 00000101.
+
+Bittisiirto vasemmalle yhdellä:  6 << 1 = 12, sillä
+00000110 << 1 = 00001100 eli 2^3 + 2^2 = 12.
+     ^^             ^^
+
+Bittisiirto oikealle yhdellä:    6 >> 1 = 3, sillä
+00000110 >> 1 = 00000011 eli 2^1 + 2^0 = 3.
+     ^^               ^^
+
+Myös pidemmät siirrot ovat mahdollisia:
+Bittisiirto vasemmalle neljällä: 6 << 4 = 96, sillä
+00000110 << 4 = 01100000 eli 2^6 + 2^5 = 96
+     ^^          ^^
+
+Siirto vasemmalle tarkoittaa itse asiassa kertomista kahdella ja
+siirto vasemmalle jakamista kahdella (kokonaisjako).
+Esimerkiksi kokonaisjako 5/2 voidaan esittää bittisiirtona 5 >> 1:
+00000101 >> 1 = 0000010 = 1*2^1 = 2
+     ^ ^             ^ ^
+ 
+Kertolasku 5*8 voidaan esittää bittisiirtona 5 << 3, koska 8 = 2^3:
+00000101 << 3 = 00101000 = 1*2^5 + 1*2^3 = 32 + 8 = 40
+     ^ ^          ^ ^
+
+Oikealle siirrettäessä oikeanpuoleinen bitti siis valui
+reunalta yli (bitin ylivuoto). Sama tapahtuisi myös vasemmalla
+laidalla, jos siirto vasemmalle olisi ollut riittävän suuri.
+
+C-kielessä on suositeltavaa käyttää bittisiirtoja vain
+unsigned-kokonaisluvuille, sillä negatiivisten lukujen
+bittisiirrot saattavat tuottaa laitteistosta riippuen
+erilaisia lopputuloksia. Jos oikealle siirrettävä luku
+on tyyppiä signed ja sen vasemmanpuoleisin bitti on
+ykkönen, luku on tulkittavissa negatiiviseksi. Kun
+tällaiselle luvulle suoritetaan bittisiirto oikealle,
+vasemmalle jäävät bittipaikat asetetaan yleensä nolliksi.
+Joissakin laitteistoissa saatetaan kuitenkin muuttaa
+vasemmanpuoleisin bitti ykköseksi ilmaisemaan negatiivisuutta.
+
+
+
+LOOGISET BITTIOPERAATIOT
+------------------------
+Sekä C-kielessä että Javassa operaattori && vastaa loogista
+AND-operaatiota ja || loogista OR-operaatiota. Seuraavaksi
+esitellään näiden operaatioiden bitittäiset vastineet.
+
+Bitittäinen AND:
+Muuttujat A ja B ovat lukuja.
+Lausekkeen "A & B" tulos on luku. Luvun bitti on ykkönen jos ja
+vain jos lukujen A ja B vastaava bitti on molemmilla ykkönen.
+
+Esim. 8-bittisillä luvuilla:
+5      = 00000101
+22     = 00010110
+-----------------
+5 & 22 = 00000100 = 4
+
+Bitittäinen OR:
+Lausekkeen "A | B" tulos on luku. Luvun bitti on ykkönen jos ja
+vain jos luvun A tai luvun B (tai molempien) bitti vastaavalla
+kohdalla on ykkönen.
+5      = 00000101
+22     = 00010110
+-----------------
+5 | 22 = 00010111 = 23
+
+Bitittäinen XOR (poissulkeva OR):
+Lausekkeen "A ^ B" tulos on luku. Luvun bitti on ykkönen jos ja
+vain jos joko luvun A tai luvun B bitti vastaavalla kohdalla
+on ykkönen, mutta ei molempien.
+5      = 00000101
+22     = 00010110
+-----------------
+5 ^ 22 = 00010011 = 19
+
+Bitittäinen komplementti (negaatio):
+Lausekkeen "~A" (tilde, mato) tulos on luku. Luvun
+bitti on ykkönen jos ja vain jos joko luvun A bitti vastaavalla
+kohdalla on nolla.
+5      = 00000101
+~5     = 11111010 =
+Mahdolliset tulkinnat:
+  <Javan byte> = -6
+  <C:n signed char> = -6
+  <C:n unsigned char> = +250
+
+Luku, jossa kaikki bitit ovat ykkösiä, saadaan helposti
+operaatiolla ~0, sillä luvun 0 kaikki bitit ovat pois
+päältä.
+
+
+
+
+TAVUSTA BITEIKSI
+----------------
+On olemassa useita tapoja muuttaa kokonaisluku bittiesitykseksi
+- tässä on niistä yksi. Javassa tavut kannattaa säilyttää int-tyyppisinä,
+jotta niiden arvoväli olisi aina epänegatiivinen [0, 255]. Tämä onnistuu
+käyttämällä InputStream- ja OutputStream-luokkien aliluokkia, esim.
+FileInputReader- ja FileOutputReader-luokkia. Myös C-kielessä kannattaa
+käyttää tyyppiä int.
+
+	/**
+	 * Palauttaa parametrina saadun luvun 8 vähiten merkitsevää
+	 * bittiä taulukossa (luvut [0, 255]).
+	 *
+	 * @param data muunnettava tavu, lukuarvo väliltä [0, 255]
+	 * @return parametrin 8 vähiten merkitsevää bittiä taulukossa,
+	 *         vähiten merkitsevä bitti on viimeisessä indeksissä.
+	 */
+	public static boolean[] byteToBits(int data) {
+		if (data < 0 || 255 < data) {
+			throw new IllegalArgumentException("" + data);
+		}
+
+		boolean[] bits = new boolean[8];
+		for (int i=0; i < 8; i++) {
+			bits[i] = ( (data & (1 << (7-i)) ) != 0 );
+		}
+		return bits;
+	}
+
+
+
+BITEISTÄ TAVUKSI
+----------------
+On olemassa useita tapoja muuttaa bitit vastaavaksi kokonaisluvuksi
+- tässä on niistä yksi. Javassa tavut kannattaa säilyttää int-tyyppisinä,
+jotta niiden arvoväli olisi aina epänegatiivinen [0, 255]. Tämä onnistuu
+käyttämällä InputStream- ja OutputStream-luokkien aliluokkia, esim.
+FileInputReader- ja FileOutputReader-luokkia. Myös C-kielessä kannattaa
+käyttää tyyppiä int.
+
+	/**
+	 * Muuttaa parametrina saadun bittitaulukon bitit
+	 * vastaavaksi kokonaisluvuksi väliltä [0, 255].
+	 *
+	 * @param 8-paikkainen bittitaulukko, vähiten merkitsevä bitti
+	 *        viimeisessä indeksissä.
+	 * @return bittien kokonaislukuesitys väliltä [0, 255]
+	 */
+	public static int bitsToByte(boolean[] bits) {
+		if (bits == null || bits.length != 8) {
+			throw new IllegalArgumentException();
+		}
+
+		int data = 0;
+		for (int i = 0; i < 8; i++) {
+			if (bits[i]) data += (1 << (7-i));
+		}
+		return data;
+	}
+
+
+
+BITTIEN LUKEMINEN TIEDOSTOSTA:
+------------------------------
+Koska tietokone ei osaa lukea tiedostoa biteittäin, bitittäisyys
+on hoidettava välivaiheen avulla:
+
+- Toistetaan, kunnes tiedosto on päättynyt {
+    - Lue tiedostosta seuraava tavu B
+    - Selvitä tavun B sisältämät bitit esim. byteToBits()-metodin avulla
+    - Toistetaan tavun B biteille 1--8 {
+        - ...
+    }
+}
+
+Huom! Lukemisessa täytyy huomioida, että viimeinen tavu voi sisältää
+joitakin roskabittejä. Katso "BITTIEN KIRJOITTAMINEN TIEDOSTOON".
+
+
+
+
+BITTIEN KIRJOITTAMINEN TIEDOSTOON:
+----------------------------------
+Tiedostoon ei voi kirjoittaa bitti kerrallaan. Kirjoitettavia
+bittejä on puskuroitava, kunnes niitä on kertynyt 8 kpl. Kun
+bittejä on kertynyt puskuriin 8 kpl, niistä voidaan muodostaa
+tavu esim. bitsToByte()-metodin avulla. Tämä tavu voidaan kirjoittaa
+tiedostoon. Kirjoittamisen jälkeen puskuri tyhjennetään.
+
+Kirjoitettavien bittien kokonaismäärä ei ole kuitenkaan aina
+jaollinen luvulla 8. Mitä jos kirjoitettavia bittejä on yhteensä
+esim. 19 kpl, eikä enempää bittejä tule kirjoitettavaksi? Tämä
+tuottaa 2 kokonaista kirjoitettavaa tavua (2 * 8 bittiä) ja 3
+bittiä ylimääräistä. Ainoa ratkaisu on lisätä sen verran ns.
+roskabittejä puskuriin, että jäljellä olevien bittien
+kokonaismäärä on 8. Roskabitit voivat kaikki olla nollia. Tämä
+8 bitin muodostama tavu voidaan kirjoittaa tiedostoon. Tiedostoa
+luettaessa täytyy huomioida, että viimeisessä tavussa saattaa
+olla mukana roskabittejä. Tunnistaminen vaihtelee ohjelman mukaan,
+mutta perustuu yleensä siihen, että tiedoston loppuminen
+aavistetaan jo ennen kuin tiedosto oikeasti loppuu.
+
+Kirjoitettavat bitit, 19 kpl:
+
+1. tavu  2. tavu  ylimääräiset
+-------- -------- ---
+10011011 00110001 101
+
+
+1. tavu  2. tavu  3.tavu
+-------- -------- --------
+10011011 00110001 10100000
+                     ^^^^^
+                     roskabitit
+
+
+
+
+VINKKI
+------ 
+Ohjelmat kannattaa ensin toteuttaa niin, että bittien sijaan käsitellään
+merkkejä (tavuja) '1' ja '0'. Bittitasolle kannattaa siirtyä vasta sitten,
+kun ohjelma toimii oikein merkkitasolla.
+
+
+-- 
+Esa Junttila 5.9.2005
+
+000000000000000000000000000000000000000

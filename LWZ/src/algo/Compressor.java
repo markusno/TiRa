@@ -38,7 +38,9 @@ public class Compressor {
             currentChar = (char) input.read();
             if (!codeDictionary.containsKey(currentString + currentChar)) {
                 Integer currentCode = codeDictionary.get(currentString);
-                codeDictionary.put(currentString + currentChar, codeDictionary.size());
+                if (codeDictionary.size() < 4096) {
+                    codeDictionary.put(currentString + currentChar, codeDictionary.size());
+                }
                 compressed.add(currentCode);
                 currentString = "";
             }
@@ -60,9 +62,9 @@ public class Compressor {
                 } else {
                     code = 0;
                 }
-                System.out.println(code);
+                //System.out.println(code);
                 for (int j = 0; j < 12; j++) {
-                    bits[j + 12*i] = (code & (1 << (11 - j))) != 0;
+                    bits[j + 12 * i] = (code & (1 << (11 - j))) != 0;
 
                     //System.out.println(bits[j + 12*i]);
                 }
@@ -72,10 +74,10 @@ public class Compressor {
             for (int i = 0; i < 3; i++) {
                 int bYte = 0;
                 for (int j = 0; j < 8; j++) {
-                    
+
                     if (bits[j + 8 * i]) {
                         //System.out.println(j + 8 * i);
-                        bYte += (1 << (7-j));
+                        bYte += (1 << (7 - j));
                     }
                 }
                 //System.out.println(bYte);

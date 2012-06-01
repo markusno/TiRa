@@ -36,13 +36,13 @@ public class DeCompressor {
         for (Integer code : codes) {
             if (!stringDictionary.containsKey(code)) {
                 stringDictionary.put(code, previous + previous.charAt(0));
-                System.out.println(previous + previous.charAt(0));
+                //System.out.println(previous + previous.charAt(0));
             }
             
-            else if (previous.length() > 0 ) {
+            else if (previous.length() > 0 && stringDictionary.size() < 4096) {
                 stringDictionary.put(stringDictionary.size(),
                         previous + stringDictionary.get(code).charAt(0));
-                System.out.println(previous + stringDictionary.get(code).charAt(0));
+                //System.out.println(previous + stringDictionary.get(code).charAt(0));
             }
             deCompressed += stringDictionary.get(code);
             previous = stringDictionary.get(code);
@@ -71,7 +71,7 @@ public class DeCompressor {
                         code += (1 << (11 - j));
                     }
                 }
-                System.out.println(code);
+                //System.out.println(code);
                 if (input.available() > 3 || code != 0) {
                     codes.add(code);
                 }

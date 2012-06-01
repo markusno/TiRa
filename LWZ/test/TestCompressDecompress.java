@@ -33,16 +33,27 @@ public class TestCompressDecompress {
     public void setUp() {
         compressor = new Compressor();
         decompressor = new DeCompressor();
-        original = new File("test.txt");
+        original = new File("test.tst");
         compressed = new File("testcomp.txt");
         decompressed = new File("testout.txt");       
     }
     
     private void initOriginal() throws FileNotFoundException, IOException{
         FileOutputStream out = new FileOutputStream(original);
+        int[][] randomWords = new int[100][];
         Random r = new Random();
-        for (int i = 0; i < 2000; i++){
-            out.write(r.nextInt(256));
+        for (int i = 0; i < 100; i++){
+            int wordLength = 1 + r.nextInt(10);
+            randomWords[i] = new int[wordLength];
+            for (int j = 0; j < wordLength; j++){
+                randomWords[i][j] = r.nextInt(256);
+            }
+        }        
+        for (int i = 0; i < 50000; i++){
+            int wordInd = r.nextInt(100);
+            for (int bYte : randomWords[wordInd]) {
+                out.write(bYte);
+            }           
         }
         out.close();
     }
@@ -72,7 +83,7 @@ public class TestCompressDecompress {
     
     @Test
     public void testCompressDecompress()throws IOException{
-        //initOriginal();
+        initOriginal();
         FileInputStream in = new FileInputStream(original);
         FileOutputStream out = new FileOutputStream(compressed);
         compressor.compres(in, out);
