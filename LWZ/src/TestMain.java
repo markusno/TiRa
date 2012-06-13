@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import testTools.FileComparator;
+import testTools.RandomFileGenerator;
 
 /*
  * To change this template, choose Tools | Templates and open the template in
@@ -56,14 +57,28 @@ public class TestMain {
         
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) {        
+//        for (String fileName : testFiles) {
+//            System.out.println("-----------------------------");
+//            File file = new File(fileName);
+//            testFile(file);
+//        }
         
-        for (String fileName : testFiles) {
-            System.out.println("-----------------------------");
-            File file = new File(fileName);
-            testFile(file);
+        RandomFileGenerator generator = new RandomFileGenerator();
+        FileOutputStream output;
+        
+        for (int i = 20000; i <= 100000; i += 20000){
+            System.out.println("---------------------");
+            String fileName = i+"_random_words";
+            try {
+                output = new FileOutputStream(fileName);
+                generator.generateFile(output, 10, 300, i);
+                testFile(new File(fileName));
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+            }
+            
         }
-        
 
     }
 }

@@ -29,31 +29,33 @@ public class DeCompressor {
         }
     }
 
-    public String deCompres(FileInputStream input, FileOutputStream output) throws IOException {
-        String deCompressed = "";
+    public String[] deCompres(FileInputStream input, FileOutputStream output) throws IOException {
+
         String previous = "";
         ArrayList<Integer> codes = codesFromFile(input);
-        System.out.println(codes.size());
+        String[] deCompressed = new String[codes.size()];
+        //System.out.println(codes.size());
+        int index = 0;
         for (Integer code : codes) {
-            System.out.println(code);
+            //System.out.println(code);
             if (!stringDictionary.containsKey(code)) {
                 stringDictionary.put(code, previous + previous.charAt(0));
                 //System.out.println(previous + previous.charAt(0));
-            }
-            
-            else if (previous.length() > 0 && stringDictionary.size() < 4096) {
+            } else if (previous.length() > 0 && stringDictionary.size() < 4096) {
                 stringDictionary.put(stringDictionary.size(),
                         previous + stringDictionary.get(code).charAt(0));
                 //System.out.println(previous + stringDictionary.get(code).charAt(0));
             }
-            deCompressed += stringDictionary.get(code);
+            deCompressed[index] = stringDictionary.get(code);
+            index++;
             previous = stringDictionary.get(code);
         }
-        
-        for (int i = 0; i < deCompressed.length(); i++) {
-            output.write((int) deCompressed.charAt(i));
+        for (String string : deCompressed) {
+            for (int i = 0; i < string.length(); i++) {
+                output.write((int) string.charAt(i));
+            }
         }
-        System.out.println("valmis");
+        //System.out.println("valmis");
         output.close();
         return deCompressed;
     }
