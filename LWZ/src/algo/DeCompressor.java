@@ -33,7 +33,9 @@ public class DeCompressor {
         String deCompressed = "";
         String previous = "";
         ArrayList<Integer> codes = codesFromFile(input);
+        System.out.println(codes.size());
         for (Integer code : codes) {
+            System.out.println(code);
             if (!stringDictionary.containsKey(code)) {
                 stringDictionary.put(code, previous + previous.charAt(0));
                 //System.out.println(previous + previous.charAt(0));
@@ -47,9 +49,11 @@ public class DeCompressor {
             deCompressed += stringDictionary.get(code);
             previous = stringDictionary.get(code);
         }
+        
         for (int i = 0; i < deCompressed.length(); i++) {
             output.write((int) deCompressed.charAt(i));
         }
+        System.out.println("valmis");
         output.close();
         return deCompressed;
     }

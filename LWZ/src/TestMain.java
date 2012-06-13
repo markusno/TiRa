@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import testTools.FileComparator;
 
 /*
  * To change this template, choose Tools | Templates and open the template in
@@ -19,29 +20,50 @@ import java.util.logging.Logger;
  */
 public class TestMain {
 
-    public static void main(String[] args) {
-        Compressor c = new Compressor();
-        DeCompressor d = new DeCompressor();
-        File fIn = new File("test.txt");
-        File fComp = new File("testcomp.txt");
-        File fOut = new File("testout.txt");
-        FileInputStream a;
-        FileOutputStream b;
+    private static String[] testFiles = { 
+        "PrideAndPrejudice.txt", "PrideAndPrejudice.pdf", "AlchemyRumpulooppi.wav",
+    "Leafy_wallpaper.bmp", "Leafy_wallpaper.jpg"};
+    
+    private static void testFile(File file){
+        Compressor comp = new Compressor();
+        DeCompressor deComp = new DeCompressor();
+        FileComparator compare = new FileComparator();
+        System.out.println("Alkuperäinen tiedosto: " + file.getName());
         try {
-            a = new FileInputStream(fIn);
-            b = new FileOutputStream(fComp);
-            c.compres(a, b);
-            System.out.println("Decomp");
-            a = new FileInputStream(fComp);
-            b = new FileOutputStream(fOut);
-            String p = d.deCompres(a, b);
-            //System.out.println(a);
-            //System.out.println(p);
+            FileInputStream input = new FileInputStream(file);
+            System.out.println("Alkuperäisen koko: " + (input.available()/1000) + " kilotavua");
+            FileOutputStream output = new FileOutputStream("compressed");
+            Long startTime = System.currentTimeMillis();
+            comp.compres(input, output);
+            Long finishTime = System.currentTimeMillis();
+            System.out.println("Pakkaamiseen kului: " + (finishTime-startTime) + " ms");
+            FileInputStream compressed = new FileInputStream("compressed");
+            input = new FileInputStream(file);
+            System.out.println("Pakatun koko: " + (compressed.available()/1000) + " kilotavua ("
+                    + compare.fileSizeRatio(input, compressed) + " % alkuperäisestä)");
+            output = new FileOutputStream("decomp_"+file.getName());
+            startTime = System.currentTimeMillis();
+            deComp.deCompres(compressed, output);
+            finishTime = System.currentTimeMillis();
+            System.out.println("Purkamiseen kului: " + (finishTime-startTime) + " ms");
+            FileInputStream deCompressed = new FileInputStream("decomp_"+file.getName());
+            System.out.println("Purettu vastaa alkuperäistä: " + compare.equalFiles(input, deCompressed));
             
         } catch (Exception ex) {
-            Logger.getLogger(TestMain.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Tiedotossa ongelma: " + ex.getMessage());
+            return;
         }
-
+        
+    }
+    
+    public static void main(String[] args) {
+        
+        for (String fileName : testFiles) {
+            System.out.println("-----------------------------");
+            File file = new File(fileName);
+            testFile(file);
+        }
+        
 
     }
 }
