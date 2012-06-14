@@ -22,8 +22,8 @@ import testTools.RandomFileGenerator;
 public class TestMain {
 
     private static String[] testFiles = { 
-        "PrideAndPrejudice.txt", "PrideAndPrejudice.pdf", "AlchemyRumpulooppi.wav",
-    "Leafy_wallpaper.bmp", "Leafy_wallpaper.jpg"};
+        "PrideAndPrejudice.txt", "PrideAndPrejudice.pdf",
+    "Leafy_wallpaper.bmp", "Leafy_wallpaper.jpg", "bible.txt"};
     
     private static void testFile(File file){
         Compressor comp = new Compressor();
@@ -58,11 +58,11 @@ public class TestMain {
     }
     
     public static void main(String[] args) {        
-//        for (String fileName : testFiles) {
-//            System.out.println("-----------------------------");
-//            File file = new File(fileName);
-//            testFile(file);
-//        }
+        for (String fileName : testFiles) {
+            System.out.println("-----------------------------");
+            File file = new File(fileName);
+            testFile(file);
+        }
         
         RandomFileGenerator generator = new RandomFileGenerator();
         FileOutputStream output;
