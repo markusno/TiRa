@@ -8,8 +8,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
+import memory.*;
 
 /**
  *
@@ -17,10 +17,10 @@ import java.util.HashMap;
  */
 public class Compressor {
 
-    private HashMap<String, Integer> codeDictionary;
+    private GenericHashMap<String, Integer> codeDictionary;
 
     public Compressor() {
-        codeDictionary = new HashMap<String, Integer>();
+        codeDictionary = new GenericHashMap<String, Integer>();
         initDictionary();
     }
 
@@ -30,8 +30,8 @@ public class Compressor {
         }
     }
 
-    public ArrayList<Integer> compres(FileInputStream input, FileOutputStream output) throws IOException {
-        ArrayList<Integer> compressed = new ArrayList<Integer>();
+    public GenericList<Integer> compres(FileInputStream input, FileOutputStream output) throws IOException {
+        GenericList<Integer> compressed = new GenericList<Integer>();
         String currentString = "";
         char currentChar;
         while (input.available() > 0) {
@@ -46,12 +46,14 @@ public class Compressor {
             }
             currentString += currentChar;
         }
+//        System.out.println(codeDictionary);
+//        System.out.println(compressed);
         compressed.add(codeDictionary.get(currentString));
         toFile(compressed, output);
         return compressed;
     }
 
-    private void toFile(ArrayList<Integer> codes, FileOutputStream output) throws IOException {
+    private void toFile(GenericList<Integer> codes, FileOutputStream output) throws IOException {
         int index = 0;
         int code;
         while (index < codes.size()) {
