@@ -35,7 +35,7 @@ public class TestMain {
             System.out.println("Alkuperäisen koko: " + (input.available()/1000) + " kilotavua");
             FileOutputStream output = new FileOutputStream("compressed");
             Long startTime = System.currentTimeMillis();
-            comp.compres(input, output);
+            comp.compress(input, output);
             Long finishTime = System.currentTimeMillis();
             System.out.println("Pakkaamiseen kului: " + (finishTime-startTime) + " ms");
             FileInputStream compressed = new FileInputStream("compressed");
@@ -44,7 +44,7 @@ public class TestMain {
                     + compare.fileSizeRatio(input, compressed) + " % alkuperäisestä)");
             output = new FileOutputStream("decomp_"+file.getName());
             startTime = System.currentTimeMillis();
-            deComp.deCompres(compressed, output);
+            deComp.deCompress(compressed, output);
             finishTime = System.currentTimeMillis();
             System.out.println("Purkamiseen kului: " + (finishTime-startTime) + " ms");
             FileInputStream deCompressed = new FileInputStream("decomp_"+file.getName());

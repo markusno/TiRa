@@ -86,10 +86,10 @@ public class TestCompressDecompress {
         initOriginal();
         FileInputStream in = new FileInputStream(original);
         FileOutputStream out = new FileOutputStream(compressed);
-        compressor.compres(in, out);
+        compressor.compress(in, out);
         in = new FileInputStream(compressed);
         out = new FileOutputStream(decompressed);
-        decompressor.deCompres(in, out);
+        decompressor.deCompress(in, out);
         boolean match = comparison();
         assertEquals(message, true, match);
     }

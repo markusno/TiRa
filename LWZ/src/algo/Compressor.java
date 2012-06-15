@@ -8,17 +8,22 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import memory.*;
 
 /**
- *
+ * Object from this class reads file from FileInputStream compresses it and writes it into FileoutputStream.
+ * This compressor uses lossless LZW (Lempel-Ziv-Welch) algorithm to compress information.
+ * It is useful only with files that have repetitive information.
+ * @see DeCompressor
  * @author markus
  */
 public class Compressor {
 
     private GenericHashMap<String, Integer> codeDictionary;
 
+    /**
+     * Constructs new compressor object.
+     */
     public Compressor() {
         codeDictionary = new GenericHashMap<String, Integer>();
         initDictionary();
@@ -30,7 +35,14 @@ public class Compressor {
         }
     }
 
-    public GenericList<Integer> compres(FileInputStream input, FileOutputStream output) throws IOException {
+    /**
+     * Reads file from FileInputStream compresses it and writes it into FileOutputStream.
+     * @param input FileInputStream constructed using any type of file.
+     * @param output FileOutputStream constructed with file into which compressed file is wanted.
+     * @throws IOException 
+     * 
+     */
+    public void compress(FileInputStream input, FileOutputStream output) throws IOException {
         GenericList<Integer> compressed = new GenericList<Integer>();
         String currentString = "";
         char currentChar;
@@ -46,14 +58,11 @@ public class Compressor {
             }
             currentString += currentChar;
         }
-//        System.out.println(codeDictionary);
-//        System.out.println(compressed);
         compressed.add(codeDictionary.get(currentString));
-        toFile(compressed, output);
-        return compressed;
+        codesToFile(compressed, output);
     }
 
-    private void toFile(GenericList<Integer> codes, FileOutputStream output) throws IOException {
+    private void codesToFile(GenericList<Integer> codes, FileOutputStream output) throws IOException {
         int index = 0;
         int code;
         while (index < codes.size()) {
@@ -64,25 +73,19 @@ public class Compressor {
                 } else {
                     code = 0;
                 }
-                //System.out.println(code);
                 for (int j = 0; j < 12; j++) {
                     bits[j + 12 * i] = (code & (1 << (11 - j))) != 0;
-
-                    //System.out.println(bits[j + 12*i]);
                 }
                 index++;
             }
-            //System.out.println(bits);
             for (int i = 0; i < 3; i++) {
                 int bYte = 0;
                 for (int j = 0; j < 8; j++) {
 
                     if (bits[j + 8 * i]) {
-                        //System.out.println(j + 8 * i);
                         bYte += (1 << (7 - j));
                     }
                 }
-                //System.out.println(bYte);
                 output.write(bYte);
             }
         }

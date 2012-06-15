@@ -7,19 +7,24 @@ package algo;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import memory.*;
 
 /**
- *
+ * Object from this class reads file, compressed with Compressor, from FileInputStream and writes decompressed data into FileOutputStream.
+ * This decompressor uses lossless LZW (Lempel-Ziv-Welch) algorithm to decompress information.
+ * It is useful only with files that have repetitive information.
  * @author markus
+ * @see Compressor
  */
 public class DeCompressor {
 
-    private HashMap<Integer, String> stringDictionary;
+    private GenericHashMap<Integer, String> stringDictionary;
 
+    /**
+     * Constructs DeCompressor object.
+     */
     public DeCompressor() {
-        stringDictionary = new HashMap<Integer, String>();
+        stringDictionary = new GenericHashMap<Integer, String>();
         initDictionary();
     }
 
@@ -29,22 +34,26 @@ public class DeCompressor {
         }
     }
 
-    public String[] deCompres(FileInputStream input, FileOutputStream output) throws IOException {
+    /**
+     * Reads compressed file from FileInputStream decompresses it and writes it into FileOutputStream.
+     * @param input FileInputStream constructed using file outputted by Compressor object.
+     * @param output FileOutputStream constructed with file into which decompressed file is wanted.
+     * @throws IOException 
+     * 
+     */
+    public void deCompress(FileInputStream input, FileOutputStream output) throws IOException {
 
         String previous = "";
-        ArrayList<Integer> codes = codesFromFile(input);
+        GenericList<Integer> codes = codesFromFile(input);
         String[] deCompressed = new String[codes.size()];
-        //System.out.println(codes.size());
         int index = 0;
-        for (Integer code : codes) {
-            //System.out.println(code);
+        for (int i = 0; i < codes.size(); i++) {
+            int code = codes.get(i);
             if (!stringDictionary.containsKey(code)) {
                 stringDictionary.put(code, previous + previous.charAt(0));
-                //System.out.println(previous + previous.charAt(0));
             } else if (previous.length() > 0 && stringDictionary.size() < 4096) {
                 stringDictionary.put(stringDictionary.size(),
                         previous + stringDictionary.get(code).charAt(0));
-                //System.out.println(previous + stringDictionary.get(code).charAt(0));
             }
             deCompressed[index] = stringDictionary.get(code);
             index++;
@@ -55,13 +64,11 @@ public class DeCompressor {
                 output.write((int) string.charAt(i));
             }
         }
-        //System.out.println("valmis");
         output.close();
-        return deCompressed;
     }
 
-    ArrayList<Integer> codesFromFile(FileInputStream input) throws IOException {
-        ArrayList<Integer> codes = new ArrayList<Integer>();
+    private GenericList<Integer> codesFromFile(FileInputStream input) throws IOException {
+        GenericList<Integer> codes = new GenericList<Integer>();
         boolean[] bits = new boolean[24];
         while (input.available() > 0) {
             for (int i = 0; i < 3; i++) {
@@ -77,7 +84,6 @@ public class DeCompressor {
                         code += (1 << (11 - j));
                     }
                 }
-                //System.out.println(code);
                 if (input.available() > 3 || code != 0) {
                     codes.add(code);
                 }
